@@ -41,10 +41,12 @@ class SnakeGame {
         // Кнопки
         this.restartBtn.addEventListener('click', () => {
             this.restart();
+            this.startGame(); // Запускаем игру сразу после перезапуска
         });
         
         this.playAgainBtn.addEventListener('click', () => {
             this.restart();
+            this.startGame(); // Запускаем игру сразу после перезапуска
         });
     }
     
