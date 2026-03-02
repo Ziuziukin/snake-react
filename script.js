@@ -15,6 +15,7 @@ class SnakeGame {
         
         this.init();
         this.setupEventListeners();
+        this.draw(); // Рисуем начальное состояние
     }
     
     init() {
@@ -24,6 +25,7 @@ class SnakeGame {
         this.score = 0;
         this.gameRunning = false;
         this.gameOver = false;
+        this.gameStarted = false;
         
         this.loadHighScore();
         this.updateScore();
@@ -33,9 +35,6 @@ class SnakeGame {
     setupEventListeners() {
         // Управление клавиатурой
         document.addEventListener('keydown', (e) => {
-            if (!this.gameRunning && !this.gameOver) {
-                this.startGame();
-            }
             this.handleKeyPress(e);
         });
         
@@ -47,19 +46,19 @@ class SnakeGame {
         this.playAgainBtn.addEventListener('click', () => {
             this.restart();
         });
-        
-        // Автозапуск через 2 секунды
-        setTimeout(() => {
-            if (!this.gameRunning) {
-                this.startGame();
-            }
-        }, 2000);
     }
     
     startGame() {
-        if (this.gameOver) return;
+        if (this.gameRunning || this.gameOver) return;
         
         this.gameRunning = true;
+        this.gameStarted = true;
+        
+        // Если направление не задано, устанавливаем начальное движение вправо
+        if (this.direction.x === 0 && this.direction.y === 0) {
+            this.direction = { x: 1, y: 0 };
+        }
+        
         this.gameLoop();
     }
     
@@ -76,6 +75,11 @@ class SnakeGame {
     handleKeyPress(e) {
         if (this.gameOver) return;
         
+        // Запускаем игру при первом нажатии клавиши
+        if (!this.gameStarted) {
+            this.startGame();
+        }
+        
         const key = e.key.toLowerCase();
         
         // Предотвращаем движение в противоположном направлении
@@ -85,24 +89,28 @@ class SnakeGame {
                 if (this.direction.y === 0) {
                     this.direction = { x: 0, y: -1 };
                 }
+                e.preventDefault();
                 break;
             case 'arrowdown':
             case 's':
                 if (this.direction.y === 0) {
                     this.direction = { x: 0, y: 1 };
                 }
+                e.preventDefault();
                 break;
             case 'arrowleft':
             case 'a':
                 if (this.direction.x === 0) {
                     this.direction = { x: -1, y: 0 };
                 }
+                e.preventDefault();
                 break;
             case 'arrowright':
             case 'd':
                 if (this.direction.x === 0) {
                     this.direction = { x: 1, y: 0 };
                 }
+                e.preventDefault();
                 break;
         }
     }
@@ -199,6 +207,15 @@ class SnakeGame {
             2 * Math.PI
         );
         this.ctx.fill();
+        
+        // Показываем подсказку, если игра не запущена
+        if (!this.gameStarted && !this.gameOver) {
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            this.ctx.font = '16px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('Нажмите любую клавишу для начала', 
+                this.canvas.width / 2, this.canvas.height / 2 + 50);
+        }
     }
     
     generateFood() {
